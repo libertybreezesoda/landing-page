@@ -102,7 +102,7 @@ header.scrolled .menu-btn span{background:var(--ink)}
 
 /* sea layers */
 .surf{position:absolute;left:0;right:0;height:150px;pointer-events:none}
-.surf svg{position:absolute;bottom:0;left:0;width:200%;height:100%}
+.surf svg{position:absolute;bottom:0;left:0;width:2880px;height:100%}
 .surf-1{bottom:16%;opacity:.55}.surf-1 svg{animation:roll 16s linear infinite}
 .surf-2{bottom:9%;opacity:.75}.surf-2 svg{animation:roll 11s linear infinite reverse}
 .surf-3{bottom:0}.surf-3 svg{animation:roll 8s linear infinite}
@@ -149,7 +149,7 @@ header.scrolled .menu-btn span{background:var(--ink)}
 /* ============ FLAVOR LAGOON ============ */
 .lagoon{position:relative;overflow:hidden;color:#fff;padding:5.5rem 0 9rem}
 .foam{position:absolute;left:0;right:0;bottom:-2px;z-index:2;pointer-events:none}
-.foam svg{display:block;width:100%;height:60px}
+.foam svg{display:block;width:max(100%,1440px);height:60px}
 .lagoon-bg{position:absolute;inset:0;transition:opacity 1s ease;background:linear-gradient(165deg,#e3103c,#ff9d3f)}
 .lagoon-bg.back{opacity:0}
 .lagoon::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
@@ -223,7 +223,7 @@ header.scrolled .menu-btn span{background:var(--ink)}
     radial-gradient(40% 12% at 65% 88%,rgba(150,100,30,.12),transparent 70%)}
 .shorebreak{position:absolute;left:0;right:0;bottom:-2px;height:150px;z-index:3;pointer-events:none}
 .wv{position:absolute;inset:0;animation:wash ease-in-out infinite alternate}
-.wv svg{position:absolute;bottom:-52px;left:0;width:200%;height:212px;animation:roll linear infinite}
+.wv svg{position:absolute;bottom:-52px;left:0;width:2880px;height:212px;animation:roll linear infinite}
 .wv1{animation-duration:12s;opacity:.55}
 .wv1 svg{animation-duration:34s}
 .wv2{animation-duration:9.5s;animation-delay:-3.8s;opacity:.85}
@@ -306,7 +306,7 @@ header.scrolled .menu-btn span{background:var(--ink)}
 .golden{padding:0 0 9rem;color:#fff;
   background:linear-gradient(180deg,#0b3550 0%,#12617c 3.5%,#ff9f1c 8%,#ffd23f 22%,#ffab2e 44%,#ff7a4f 66%,#e05a78 84%,#8b3f8f 100%)}
 .dune{position:absolute;left:0;right:0;bottom:-2px;z-index:2;pointer-events:none}
-.dune svg{display:block;width:100%;height:88px}
+.dune svg{display:block;width:max(100%,1440px);height:88px}
 .gsun{position:absolute;left:50%;top:24%;width:min(46vw,400px);aspect-ratio:1;transform:translateX(-50%);border-radius:50%;pointer-events:none;
   background:radial-gradient(circle,#fffbe8 0%,#ffe98a 36%,rgba(255,183,3,.8) 55%,rgba(255,183,3,0) 72%);
   filter:blur(3px) drop-shadow(0 0 90px rgba(255,200,80,.9));animation:breathe 7s ease-in-out infinite}
