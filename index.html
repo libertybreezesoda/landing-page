@@ -62,6 +62,17 @@ header.scrolled .nav-links a{color:var(--ink)}
 header.scrolled .nav-links a:not(.btn):hover{color:var(--papaya)}
 .nav-links .btn{padding:.55em 1.3em;font-size:.95rem}
 @media(max-width:760px){.nav-links a:not(.btn){display:none}}
+.menu-btn{display:none;width:44px;height:44px;border:0;background:none;flex-direction:column;align-items:center;justify-content:center;gap:5px;flex:0 0 auto}
+.menu-btn span{display:block;width:24px;height:3px;border-radius:2px;background:#fff;transition:background .3s}
+header.scrolled .menu-btn span{background:var(--ink)}
+.mobile-menu{position:fixed;inset:0;z-index:70;display:grid;place-items:center;background:rgba(8,40,54,.95);
+  backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:opacity .28s}
+.mobile-menu.open{opacity:1;pointer-events:auto}
+.mobile-menu nav{display:flex;flex-direction:column;align-items:center;gap:1.5rem}
+.mobile-menu a{color:#fff;text-decoration:none;font-weight:800;font-size:1.45rem}
+.mobile-menu a:not(.btn):hover{color:var(--sun)}
+.mobile-menu .btn{font-size:1.15rem;color:var(--ink);margin-top:.5rem}
+.mm-close{position:absolute;top:.8rem;right:.9rem;width:48px;height:48px;border:0;background:none;color:#fff;font-size:2.1rem;line-height:1}
 
 /* ============ HERO · THE SHORELINE ============ */
 .hero{position:relative;min-height:100vh;min-height:100svh;display:grid;place-items:center;overflow:hidden;
@@ -303,7 +314,12 @@ header.scrolled .nav-links a:not(.btn):hover{color:var(--papaya)}
 .golden .scene-head{padding-top:8.5rem}
 .golden h2,.night h2{text-shadow:0 3px 0 rgba(0,0,0,.2)}
 .lights{display:block;width:100%;height:90px;position:relative;z-index:2}
-.lights line{stroke:rgba(40,16,48,.85);stroke-width:2}
+.lights-m{display:none}
+.lights line,.lights-m line{stroke:rgba(40,16,48,.85);stroke-width:2}
+@media(max-width:880px){
+  .lights{display:none}
+  .lights-m{display:block;width:100%;height:78px;position:relative;z-index:2}
+}
 .bulb{fill:#ffdf8e;animation:bulbtw 2.8s ease-in-out infinite;filter:drop-shadow(0 0 4px rgba(255,220,140,.95))}
 @keyframes bulbtw{0%,100%{opacity:1}50%{opacity:.45}}
 .pstrings{position:absolute;inset:0;z-index:2;pointer-events:none}
@@ -389,6 +405,29 @@ footer::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:
   animation:bob 6s ease-in-out infinite;opacity:.85}
 @media(max-width:1100px){.bottle{display:none}}
 
+/* ============ MOBILE ============ */
+@media(max-width:760px){
+  .menu-btn{display:flex}
+  .sun-wrap{width:48vw;top:4.5%;right:3%}
+  .palm{width:42vw}
+  .hero-inner{padding:6.5rem 1rem 10rem}
+  .hero h1{font-size:clamp(2.4rem,8.5vw,3rem)}
+  .lagoon{padding:4rem 0 7.5rem}
+  .lagoon-grid{min-height:0;gap:1.4rem}
+  .stage{min-height:0}
+  .dive{padding:3.5rem 0 4.5rem}
+  .ray.r2{width:110px;opacity:.35}
+  .golden .scene-head{padding-top:6rem}
+  .golden{padding-bottom:7rem}
+  .palm-dark{width:34vw}
+  .d-ball{display:block;left:36%;right:auto;bottom:154px;width:58px}
+  .night{padding:4rem 0 11rem}
+  .torch{display:block;width:50px;bottom:.9rem}
+  .torch.tl{left:4%}
+  .torch.tr{right:4%}
+  .torch .glow{width:76px;height:76px;top:-10px}
+}
+
 /* ============ REVEALS & MOTION PREFS ============ */
 .reveal{opacity:0;transform:translateY(34px);transition:opacity .8s ease,transform .8s ease}
 .reveal.on{opacity:1;transform:none}
@@ -414,8 +453,22 @@ footer::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:
       <a href="haitian-soda/index.html">🇭🇹 Kola Ayisyen</a>
       <a class="btn" href="https://shop.libertybreezesoda.com" target="_blank" rel="noopener">Shop&nbsp;🥤</a>
     </nav>
+    <button class="menu-btn" id="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button>
   </div>
 </header>
+
+<div class="mobile-menu" id="mobile-menu">
+  <button class="mm-close" id="mm-close" aria-label="Close menu">✕</button>
+  <nav aria-label="Mobile">
+    <a href="#flavors">Flavors</a>
+    <a href="#vibe">The Vibe</a>
+    <a href="#story">Our Story</a>
+    <a href="#party">Golden Hour</a>
+    <a href="#find-us">Find Us</a>
+    <a href="haitian-soda/index.html">🇭🇹 Kola Ayisyen</a>
+    <a class="btn" href="https://shop.libertybreezesoda.com" target="_blank" rel="noopener">Shop 🥤</a>
+  </nav>
+</div>
 
 <!-- ======= HERO · THE SHORELINE ======= -->
 <section class="hero" id="top" aria-label="Welcome to Liberty Breeze">
@@ -715,6 +768,16 @@ footer::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:
     <line x1="1310" y1="24" x2="1310" y2="32"/><circle class="bulb" cx="1310" cy="38" r="7" style="animation-delay:1.2s"/>
     <line x1="1430" y1="33" x2="1430" y2="41"/><circle class="bulb" cx="1430" cy="47" r="7" style="animation-delay:.1s;fill:#b8f1ee"/>
   </svg>
+  <svg class="lights-m" viewBox="0 0 720 100" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 22 Q180 88 360 44 T720 34" fill="none" stroke="rgba(40,16,48,.85)" stroke-width="4"/>
+    <line x1="60" y1="41" x2="60" y2="49"/><circle class="bulb" cx="60" cy="56" r="8" style="animation-delay:.2s"/>
+    <line x1="160" y1="59" x2="160" y2="67"/><circle class="bulb" cx="160" cy="74" r="8" style="animation-delay:1.1s;fill:#ffb0c4"/>
+    <line x1="260" y1="60" x2="260" y2="68"/><circle class="bulb" cx="260" cy="75" r="8" style="animation-delay:.6s"/>
+    <line x1="360" y1="44" x2="360" y2="52"/><circle class="bulb" cx="360" cy="59" r="8" style="animation-delay:1.8s;fill:#b8f1ee"/>
+    <line x1="460" y1="26" x2="460" y2="34"/><circle class="bulb" cx="460" cy="41" r="8" style="animation-delay:.9s"/>
+    <line x1="560" y1="19" x2="560" y2="27"/><circle class="bulb" cx="560" cy="34" r="8" style="animation-delay:2.2s;fill:#ffb0c4"/>
+    <line x1="660" y1="25" x2="660" y2="33"/><circle class="bulb" cx="660" cy="40" r="8" style="animation-delay:.4s"/>
+  </svg>
   <div class="pstrings" id="pstrings" aria-hidden="true"></div>
   <div class="wrap">
     <div class="polaroids">
@@ -844,6 +907,16 @@ const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 /* ================= HEADER ================= */
 const bar = document.getElementById("top-bar");
 addEventListener("scroll",()=>bar.classList.toggle("scrolled",scrollY>40),{passive:true});
+
+/* ================= MOBILE MENU ================= */
+(()=>{
+  const btn=document.getElementById("menu-btn"),panel=document.getElementById("mobile-menu"),x=document.getElementById("mm-close");
+  if(!btn||!panel)return;
+  const set=o=>{panel.classList.toggle("open",o);btn.setAttribute("aria-expanded",o)};
+  btn.addEventListener("click",()=>set(!panel.classList.contains("open")));
+  x.addEventListener("click",()=>set(false));
+  panel.querySelectorAll("nav a").forEach(a=>a.addEventListener("click",()=>set(false)));
+})();
 
 /* ================= TICKER ================= */
 (()=>{

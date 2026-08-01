@@ -53,6 +53,16 @@ header.scrolled::after{opacity:1}
 .nav-links a:not(.btn):hover{color:var(--gold2)}
 .nav-links .btn{padding:.5em 1.2em;font-size:.92rem}
 @media(max-width:760px){.nav-links a:not(.btn){display:none}}
+.menu-btn{display:none;width:44px;height:44px;border:0;background:none;flex-direction:column;align-items:center;justify-content:center;gap:5px;flex:0 0 auto}
+.menu-btn span{display:block;width:24px;height:3px;border-radius:2px;background:#fff}
+.mobile-menu{position:fixed;inset:0;z-index:70;display:grid;place-items:center;background:rgba(10,14,45,.96);
+  backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:opacity .28s}
+.mobile-menu.open{opacity:1;pointer-events:auto}
+.mobile-menu nav{display:flex;flex-direction:column;align-items:center;gap:1.5rem}
+.mobile-menu a{color:#fff;text-decoration:none;font-weight:800;font-size:1.45rem}
+.mobile-menu a:not(.btn):hover{color:var(--gold2)}
+.mobile-menu .btn{font-size:1.15rem;margin-top:.5rem}
+.mm-close{position:absolute;top:.8rem;right:.9rem;width:48px;height:48px;border:0;background:none;color:#fff;font-size:2.1rem;line-height:1}
 
 /* ============ HERO · MÒN YO ============ */
 .hero{position:relative;min-height:100vh;min-height:100svh;display:grid;place-items:center;overflow:hidden;background:#0d1b5e}
@@ -183,6 +193,21 @@ header.scrolled::after{opacity:1}
 .kfoot .foot-inner{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:1rem;padding:1.6rem 0 2.4rem;font-size:.92rem;opacity:.85}
 .kfoot .foot-inner a{color:#f2cf66;font-weight:700}
 
+/* ============ MOBILE ============ */
+.pennants svg.pm{display:none}
+@media(max-width:760px){
+  .menu-btn{display:flex}
+  .pennants svg.pd{display:none}
+  .pennants svg.pm{display:block;height:96px}
+  .hero-inner{padding:6.5rem 1rem 9rem}
+  .hero h1{font-size:clamp(3.4rem,17vw,5rem)}
+  .gou{padding:4rem 0 5rem}
+  .gou-grid{min-height:0;gap:1.6rem}
+  .stage{min-height:0}
+  .vwayaj{padding:4rem 0 4.5rem}
+  .stade{padding-top:4rem}
+}
+
 /* ============ REVEALS & MOTION ============ */
 .reveal{opacity:0;transform:translateY(34px);transition:opacity .8s ease,transform .8s ease}
 .reveal.on{opacity:1;transform:none}
@@ -205,12 +230,24 @@ header.scrolled::after{opacity:1}
       <a href="../index.html">Liberty Breeze</a>
       <a class="btn" href="https://shop.libertybreezesoda.com" target="_blank" rel="noopener">Shop 🥤</a>
     </nav>
+    <button class="menu-btn" id="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button>
   </div>
 </header>
 
+<div class="mobile-menu" id="mobile-menu">
+  <button class="mm-close" id="mm-close" aria-label="Close menu">✕</button>
+  <nav aria-label="Mobile">
+    <a href="#gou">Gou yo</a>
+    <a href="#vwayaj">Vwayaj</a>
+    <a href="#foutbol">Foutbòl</a>
+    <a href="../index.html">Liberty Breeze</a>
+    <a class="btn" href="https://shop.libertybreezesoda.com" target="_blank" rel="noopener">Shop 🥤</a>
+  </nav>
+</div>
+
 <!-- ======= HERO · MÒN YO ======= -->
 <section class="hero" id="top" aria-label="Kola Ayisyen">
-  <div class="pennants" aria-hidden="true"><svg viewBox="0 0 1440 110" preserveAspectRatio="none">
+  <div class="pennants" aria-hidden="true"><svg class="pd" viewBox="0 0 1440 110" preserveAspectRatio="none">
     <path d="M0 14 Q360 64 720 34 T1440 26" fill="none" stroke="rgba(20,11,18,.7)" stroke-width="4"/>
     <g>
       <path d="M40 26 L80 32 L60 78 Z" fill="#00209F"/><path d="M140 40 L180 44 L160 92 Z" fill="#D21034"/>
@@ -221,6 +258,15 @@ header.scrolled::after{opacity:1}
       <path d="M1040 30 L1080 29 L1062 79 Z" fill="#00209F"/><path d="M1140 28 L1180 27 L1162 77 Z" fill="#D21034"/>
       <path d="M1240 27 L1280 26 L1262 76 Z" fill="#00209F"/><path d="M1340 26 L1380 26 L1362 76 Z" fill="#D21034"/>
     </g>
+  </svg><svg class="pm" viewBox="0 0 720 110" preserveAspectRatio="none">
+    <path d="M0 14 Q180 64 360 34 T720 26" fill="none" stroke="rgba(20,11,18,.7)" stroke-width="4"/>
+    <path d="M30 28 L90 30 L60 84 Z" fill="#00209F"/>
+    <path d="M130 43 L190 45 L160 99 Z" fill="#D21034"/>
+    <path d="M230 45 L290 46 L260 100 Z" fill="#00209F"/>
+    <path d="M330 34 L390 33 L360 88 Z" fill="#D21034"/>
+    <path d="M430 21 L490 20 L460 75 Z" fill="#00209F"/>
+    <path d="M530 17 L590 17 L560 72 Z" fill="#D21034"/>
+    <path d="M630 20 L690 21 L660 75 Z" fill="#00209F"/>
   </svg></div>
 
   <div class="hero-photo" aria-hidden="true"></div>
@@ -345,6 +391,16 @@ const reduceMotion=matchMedia("(prefers-reduced-motion: reduce)").matches;
 /* header */
 const bar=document.getElementById("top-bar");
 addEventListener("scroll",()=>bar.classList.toggle("scrolled",scrollY>40),{passive:true});
+
+/* mobile menu */
+(()=>{
+  const btn=document.getElementById("menu-btn"),panel=document.getElementById("mobile-menu"),x=document.getElementById("mm-close");
+  if(!btn||!panel)return;
+  const set=o=>{panel.classList.toggle("open",o);btn.setAttribute("aria-expanded",o)};
+  btn.addEventListener("click",()=>set(!panel.classList.contains("open")));
+  x.addEventListener("click",()=>set(false));
+  panel.querySelectorAll("nav a").forEach(a=>a.addEventListener("click",()=>set(false)));
+})();
 
 /* ticker */
 (()=>{
