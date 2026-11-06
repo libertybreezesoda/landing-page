@@ -1,0 +1,25 @@
+name: Deploy to libertybreezesoda.com
+# On every push to main, rsync the site to the ERP server (same box as app.libertybreezesoda.com).
+# Secrets needed: DEPLOY_SSH_KEY (private key for the restricted "deploy" user), DEPLOY_KNOWN_HOSTS (ssh-keyscan line).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency: deploy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
+          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+      - name: Rsync site
+        run: |
+          rsync -az --delete --exclude .git --exclude .github \
+            -e "ssh -i ~/.ssh/deploy -o StrictHostKeyChecking=yes" \
+            ./ deploy@173.255.235.134:/var/www/libertybreezesoda.com/

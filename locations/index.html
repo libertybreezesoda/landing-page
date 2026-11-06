@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Where to Buy | Liberty Breeze Soda</title>
+<meta name="description" content="Stores, restaurants and markets that carry Liberty Breeze Soda and Kola Ayisyen. Updated live.">
+<link rel="icon" type="image/png" href="../images/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Baloo+2:wght@400;500;600;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/sub.css">
+</head>
+<body>
+<header id="top-bar">
+  <div class="wrap nav">
+    <a class="brand" href="/"><img src="../images/logo.png" alt="Liberty Breeze Soda logo">Liberty Breeze</a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="/#flavors">Flavors</a>
+      <a href="/locations/">Where to Buy</a>
+      <a href="/in-stock/">In Stock</a>
+      <a href="/#story">Our Story</a>
+      <a href="/haitian-soda/">🇭🇹 Kola Ayisyen</a>
+      <a class="btn" href="https://shop.libertybreezesoda.com" target="_blank" rel="noopener">Shop&nbsp;🥤</a>
+    </nav>
+    <button class="menu-btn" id="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button>
+  </div>
+</header>
+<div class="mobile-menu" id="mobile-menu">
+  <button class="mm-close" id="mm-close" aria-label="Close menu">✕</button>
+  <nav aria-label="Mobile">
+    <a href="/">Home</a>
+    <a href="/#flavors">Flavors</a>
+    <a href="/locations/">Where to Buy</a>
+    <a href="/in-stock/">In Stock</a>
+    <a href="/haitian-soda/">🇭🇹 Kola Ayisyen</a>
+    <a class="btn" href="https://shop.libertybreezesoda.com" target="_blank" rel="noopener">Shop 🥤</a>
+  </nav>
+</div>
+
+<main class="page">
+  <div class="stars" id="stars" aria-hidden="true"></div>
+  <div class="moon" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="page-head">
+      <span class="eyebrow">Find us near you</span>
+      <h1>Where to buy</h1>
+      <p>Every store, restaurant and market that stocks Liberty Breeze. Straight from our books, so if it's on this list, they've got us.</p>
+      <div class="live" id="live"><i></i><span>Loading…</span></div>
+    </div>
+    <div class="controls" id="controls">
+      <input class="search" id="q" type="search" placeholder="Search by town, store, or zip" aria-label="Search locations">
+    </div>
+    <div id="out"><p class="empty">Loading locations…</p></div>
+  </div>
+</main>
+
+<footer>
+  <div class="foot-strip" aria-hidden="true"></div>
+  <div class="wrap foot-inner">
+    <img src="../images/logo.png" alt="">
+    <span class="fbrand">Stay breezy.</span>
+    <nav class="foot-links" aria-label="Footer">
+      <a href="/#flavors">Flavors</a>
+      <a href="/locations/">Where to Buy</a>
+      <a href="/in-stock/">In Stock</a>
+      <a href="/#find-us">Contact</a>
+      <a href="https://shop.libertybreezesoda.com" target="_blank" rel="noopener">Shop</a>
+    </nav>
+  </div>
+  <div class="wrap foot-copy">© 2026 Liberty Breeze Soda · Liberty, NY · 100% pure natural sugar cane · (888) LBS-SODA</div>
+</footer>
+
+<script src="../assets/sub.js"></script>
+<script>
+const STATES={NY:"New York",NJ:"New Jersey",CT:"Connecticut",PA:"Pennsylvania",MA:"Massachusetts",FL:"Florida"};
+let ALL=[], state="";
+const out=document.getElementById("out"), controls=document.getElementById("controls"), q=document.getElementById("q");
+
+function card(l){
+  const addr=[l.street,[l.city,l.state,l.zip].filter(Boolean).join(" ")].filter(Boolean).join("\n");
+  const tel=l.phone?`<a href="tel:${esc(l.phone.replace(/[^\d+]/g,""))}">📞 ${esc(l.phone)}</a>`:"";
+  const web=l.website?`<a href="${esc(l.website)}" target="_blank" rel="noopener">🌐 Website</a>`:"";
+  return `<div class="card reveal"><h3>${esc(l.name)}</h3><div class="sub addr">${esc(addr)}</div>
+    <div class="links"><a href="${esc(l.maps)}" target="_blank" rel="noopener">📍 Directions</a>${tel}${web}</div></div>`;
+}
+function render(){
+  const t=q.value.trim().toLowerCase();
+  const rows=ALL.filter(l=>(!state||l.state===state)&&(!t||[l.name,l.city,l.zip,l.street,l.state].join(" ").toLowerCase().includes(t)));
+  if(!rows.length){out.innerHTML=`<p class="empty">No spots match that yet. Want us in your neighborhood? Tell your local store, or <a href="mailto:info@libertybreezesoda.com">email us</a>.</p>`;return}
+  const by={}; rows.forEach(l=>(by[l.state||"Other"]??=[]).push(l));
+  out.innerHTML=Object.keys(by).sort().map(s=>`<section class="group"><h2>${esc(STATES[s]||s)} <small>${by[s].length} spot${by[s].length===1?"":"s"}</small></h2>
+    <div class="grid">${by[s].map(card).join("")}</div></section>`).join("");
+  revealAll();
+}
+function chips(){
+  const states=[...new Set(ALL.map(l=>l.state).filter(Boolean))].sort();
+  const mk=(v,l)=>`<button class="chip${state===v?" on":""}" data-s="${v}">${l}</button>`;
+  controls.querySelectorAll(".chip").forEach(c=>c.remove());
+  controls.insertAdjacentHTML("afterbegin", mk("","All")+states.map(s=>mk(s,STATES[s]||s)).join(""));
+  controls.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{state=c.dataset.s;chips();render()});
+}
+q.addEventListener("input",render);
+erp("locations").then(d=>{ALL=d.locations;setLive(true,d.updated);chips();render()}).catch(e=>{
+  console.error(e);setLive(false);
+  out.innerHTML=`<p class="empty">We couldn't load the live list right now.<br><a class="btn" href="tel:1-888-527-7632">📞 Call (888) LBS-SODA</a></p>`;
+});
+</script>
+</body>
+</html>

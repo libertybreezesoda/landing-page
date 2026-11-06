@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>In Stock Now | Liberty Breeze Soda</title>
+<meta name="description" content="What Liberty Breeze flavors are in stock right now, live from our warehouse.">
+<link rel="icon" type="image/png" href="../images/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Baloo+2:wght@400;500;600;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/sub.css">
+</head>
+<body>
+<header id="top-bar">
+  <div class="wrap nav">
+    <a class="brand" href="/"><img src="../images/logo.png" alt="Liberty Breeze Soda logo">Liberty Breeze</a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="/#flavors">Flavors</a>
+      <a href="/locations/">Where to Buy</a>
+      <a href="/in-stock/">In Stock</a>
+      <a href="/#story">Our Story</a>
+      <a href="/haitian-soda/">🇭🇹 Kola Ayisyen</a>
+      <a class="btn" href="https://shop.libertybreezesoda.com" target="_blank" rel="noopener">Shop&nbsp;🥤</a>
+    </nav>
+    <button class="menu-btn" id="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button>
+  </div>
+</header>
+<div class="mobile-menu" id="mobile-menu">
+  <button class="mm-close" id="mm-close" aria-label="Close menu">✕</button>
+  <nav aria-label="Mobile">
+    <a href="/">Home</a>
+    <a href="/#flavors">Flavors</a>
+    <a href="/locations/">Where to Buy</a>
+    <a href="/in-stock/">In Stock</a>
+    <a href="/haitian-soda/">🇭🇹 Kola Ayisyen</a>
+    <a class="btn" href="https://shop.libertybreezesoda.com" target="_blank" rel="noopener">Shop 🥤</a>
+  </nav>
+</div>
+
+<main class="page stock">
+  <div class="stars" id="stars" aria-hidden="true"></div>
+  <div class="moon" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="page-head">
+      <span class="eyebrow">Ready to ship</span>
+      <h1>In stock now</h1>
+      <p>Cases on the shelf right now, straight from our warehouse count. Wholesale orders: <a href="tel:1-888-527-7632">(888) LBS-SODA</a> or <a href="mailto:info@libertybreezesoda.com">info@libertybreezesoda.com</a>.</p>
+      <div class="live" id="live"><i></i><span>Loading…</span></div>
+    </div>
+    <div class="controls" id="controls"></div>
+    <div id="out"><p class="empty">Counting bottles…</p></div>
+  </div>
+</main>
+
+<footer>
+  <div class="foot-strip" aria-hidden="true"></div>
+  <div class="wrap foot-inner">
+    <img src="../images/logo.png" alt="">
+    <span class="fbrand">Stay breezy.</span>
+    <nav class="foot-links" aria-label="Footer">
+      <a href="/#flavors">Flavors</a>
+      <a href="/locations/">Where to Buy</a>
+      <a href="/in-stock/">In Stock</a>
+      <a href="/#find-us">Contact</a>
+      <a href="https://shop.libertybreezesoda.com" target="_blank" rel="noopener">Shop</a>
+    </nav>
+  </div>
+  <div class="wrap foot-copy">© 2026 Liberty Breeze Soda · Liberty, NY · 100% pure natural sugar cane · (888) LBS-SODA</div>
+</footer>
+
+<script src="../assets/sub.js"></script>
+<script>
+const ORDER=["Liberty Breeze","Kola Ayisyen","Liberty Beer","Water & Seltzer"];
+const LOW=5; // cases
+let ALL=[], brand="", CPC=24, MULTI=false;
+const out=document.getElementById("out"), controls=document.getElementById("controls");
+
+function pic(it){
+  const local="../images/labels/"+encodeURIComponent(it.name.replace(/\s*\(.*\)\s*$/,"").toUpperCase())+".png";
+  const src=it.image||local;
+  return `<img class="pic" src="${esc(src)}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${esc(local)}';this.onerror=()=>{this.replaceWith(Object.assign(document.createElement('div'),{className:'pic ph',textContent:'🥤'}))}">`;
+}
+function card(it,max){
+  const pct=Math.max(4,Math.round(100*it.bottles/max));
+  const badge=it.cases<1?'<span class="badge">last bottles</span>':it.cases<LOW?'<span class="badge">low stock</span>':it.bottles===max?'<span class="badge hot">most stocked</span>':"";
+  const where=MULTI?`<div class="locs">${it.by_location.map(l=>esc(l.location)+": "+l.cases+" cs").join(" · ")}</div>`:"";
+  const name=it.name.replace(/\s*\((Haitian Soda)\)\s*$/,"");
+  return `<div class="card reveal">${badge}${pic(it)}<div class="body"><h3>${esc(name)}</h3>
+    <div class="qty">${it.cases} <small>case${it.cases===1?"":"s"} · ${it.bottles} bottles</small></div>
+    <div class="bar"><i style="width:${pct}%"></i></div>${where}</div></div>`;
+}
+function render(){
+  const rows=ALL.filter(it=>!brand||it.brand===brand);
+  if(!rows.length){out.innerHTML='<p class="empty">Nothing on the shelf in this line right now. New batch soon.</p>';return}
+  const max=Math.max(...ALL.map(i=>i.bottles));
+  const by={}; rows.forEach(it=>(by[it.brand]??=[]).push(it));
+  const keys=Object.keys(by).sort((a,b)=>(ORDER.indexOf(a)+99)%99-(ORDER.indexOf(b)+99)%99);
+  out.innerHTML=keys.map(k=>`<section class="group"><h2>${esc(k)} <small>${by[k].length} flavor${by[k].length===1?"":"s"} · ${by[k].reduce((s,i)=>s+i.cases,0)} cases</small></h2>
+    <div class="grid">${by[k].map(it=>card(it,max)).join("")}</div></section>`).join("");
+  revealAll();
+}
+function chips(){
+  const brands=[...new Set(ALL.map(i=>i.brand))].sort((a,b)=>(ORDER.indexOf(a)+99)%99-(ORDER.indexOf(b)+99)%99);
+  const mk=(v,l)=>`<button class="chip${brand===v?" on":""}" data-b="${esc(v)}">${esc(l)}</button>`;
+  controls.innerHTML=mk("","Everything")+brands.map(b=>mk(b,b)).join("");
+  controls.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{brand=c.dataset.b;chips();render()});
+}
+erp("stock").then(d=>{ALL=d.items;CPC=d.bottles_per_case;MULTI=d.locations.length>1;setLive(true,d.updated);chips();render()}).catch(e=>{
+  console.error(e);setLive(false);
+  out.innerHTML='<p class="empty">We couldn\'t load the live count right now.<br><a class="btn" href="tel:1-888-527-7632">📞 Call (888) LBS-SODA</a></p>';
+});
+</script>
+</body>
+</html>
