@@ -9,7 +9,43 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Baloo+2:wght@400;500;600;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw==" crossorigin="anonymous" referrerpolicy="no-referrer">
 <link rel="stylesheet" href="../assets/sub.css">
+<style>
+#map{height:min(62vh,560px);border-radius:22px;border:2px solid rgba(255,255,255,.22);box-shadow:0 18px 50px rgba(0,0,0,.35);position:relative;z-index:2;margin-bottom:2rem;background:#0e1136}
+.leaflet-container{font-family:var(--body)}
+.leaflet-popup-content-wrapper{background:#1a1a3a;color:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.leaflet-popup-tip{background:#1a1a3a}
+.leaflet-popup-content{margin:.8rem 1rem;font-size:.95rem}
+.leaflet-popup-content strong{display:block;font-size:1.05rem;margin-bottom:.15rem}
+.leaflet-popup-content a{color:var(--sun);font-weight:800;text-decoration:none}
+.pin{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--sun);border:3px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.45);display:grid;place-items:center}
+.pin::after{content:"";width:9px;height:9px;border-radius:50%;background:var(--ink)}
+.pin.active{background:var(--hibiscus)}
+.card{cursor:pointer}
+.card.active{border-color:var(--sun);background:rgba(255,210,63,.14)}
+.card .cnt{font-size:.82rem;opacity:.75}
+/* store drawer */
+.drawer{position:fixed;inset:0;z-index:80;display:flex;justify-content:flex-end;opacity:0;pointer-events:none;transition:opacity .25s}
+.drawer.open{opacity:1;pointer-events:auto}
+.drawer .veil{position:absolute;inset:0;background:rgba(5,8,28,.6);backdrop-filter:blur(4px)}
+.drawer .sheet{position:relative;width:min(440px,100%);height:100%;overflow:auto;background:linear-gradient(180deg,#2a1f55,#0e1136);color:#fff;padding:1.6rem 1.5rem 2.5rem;
+  box-shadow:-10px 0 40px rgba(0,0,0,.5);transform:translateX(30px);transition:transform .28s}
+.drawer.open .sheet{transform:none}
+.drawer h2{font-family:var(--disp);font-weight:400;font-size:1.7rem;color:var(--sun);margin:.4rem 2.4rem .3rem 0}
+.drawer .x{position:absolute;top:.8rem;right:.8rem;width:44px;height:44px;border:0;background:rgba(255,255,255,.1);color:#fff;border-radius:50%;font-size:1.5rem}
+.drawer .addr{opacity:.9;white-space:pre-line;margin-bottom:.6rem}
+.drawer .links{display:flex;gap:.9rem;flex-wrap:wrap;margin-bottom:1.4rem}
+.drawer .links a{color:var(--sun);font-weight:800;text-decoration:none}
+.drawer h3{font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;opacity:.75;margin:1.2rem 0 .6rem}
+.flav{display:flex;align-items:center;gap:.7rem;padding:.5rem .7rem;border-radius:12px;background:rgba(255,255,255,.07);margin-bottom:.4rem}
+.flav .dot{width:10px;height:10px;border-radius:50%;background:var(--lime);flex:0 0 auto}
+.flav .dot.old{background:var(--mango)}
+.flav .n{font-weight:700;flex:1}
+.flav .d{font-size:.78rem;opacity:.7}
+.drawer .note{font-size:.82rem;opacity:.65;margin-top:1rem}
+@media(max-width:600px){#map{height:52vh}.drawer .sheet{width:100%}}
+</style>
 </head>
 <body>
 <header id="top-bar">
@@ -17,11 +53,9 @@
     <a class="brand" href="/"><img src="../images/logo.png" alt="Liberty Breeze Soda logo">Liberty Breeze</a>
     <nav class="nav-links" aria-label="Main">
       <a href="/#flavors">Flavors</a>
-      <a href="/locations/">Where to Buy</a>
-      <a href="/in-stock/">In Stock</a>
       <a href="/#story">Our Story</a>
       <a href="/haitian-soda/">🇭🇹 Kola Ayisyen</a>
-      <a class="btn" href="https://shop.libertybreezesoda.com" target="_blank" rel="noopener">Shop&nbsp;🥤</a>
+      <a class="btn" href="/locations/">Shop&nbsp;🥤</a>
     </nav>
     <button class="menu-btn" id="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button>
   </div>
@@ -31,10 +65,8 @@
   <nav aria-label="Mobile">
     <a href="/">Home</a>
     <a href="/#flavors">Flavors</a>
-    <a href="/locations/">Where to Buy</a>
-    <a href="/in-stock/">In Stock</a>
     <a href="/haitian-soda/">🇭🇹 Kola Ayisyen</a>
-    <a class="btn" href="https://shop.libertybreezesoda.com" target="_blank" rel="noopener">Shop 🥤</a>
+    <a class="btn" href="/locations/">Shop 🥤</a>
   </nav>
 </div>
 
@@ -51,9 +83,24 @@
     <div class="controls" id="controls">
       <input class="search" id="q" type="search" placeholder="Search by town, store, or zip" aria-label="Search locations">
     </div>
+    <div id="map" aria-label="Map of stores"></div>
     <div id="out"><p class="empty">Loading locations…</p></div>
   </div>
 </main>
+
+<div class="drawer" id="drawer" aria-hidden="true">
+  <div class="veil" id="veil"></div>
+  <aside class="sheet" role="dialog" aria-labelledby="d-name">
+    <button class="x" id="d-close" aria-label="Close">✕</button>
+    <span class="eyebrow">Store</span>
+    <h2 id="d-name"></h2>
+    <div class="addr" id="d-addr"></div>
+    <div class="links" id="d-links"></div>
+    <h3>What they carry</h3>
+    <div id="d-items"></div>
+    <p class="note">Based on our deliveries to this store. Call ahead if you're after one flavor in particular.</p>
+  </aside>
+</div>
 
 <footer>
   <div class="foot-strip" aria-hidden="true"></div>
@@ -62,37 +109,78 @@
     <span class="fbrand">Stay breezy.</span>
     <nav class="foot-links" aria-label="Footer">
       <a href="/#flavors">Flavors</a>
-      <a href="/locations/">Where to Buy</a>
-      <a href="/in-stock/">In Stock</a>
       <a href="/#find-us">Contact</a>
-      <a href="https://shop.libertybreezesoda.com" target="_blank" rel="noopener">Shop</a>
     </nav>
   </div>
   <div class="wrap foot-copy">© 2026 Liberty Breeze Soda · Liberty, NY · 100% pure natural sugar cane · (888) LBS-SODA</div>
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="../assets/sub.js"></script>
 <script>
 const STATES={NY:"New York",NJ:"New Jersey",CT:"Connecticut",PA:"Pennsylvania",MA:"Massachusetts",FL:"Florida"};
-let ALL=[], state="";
+let ALL=[], state="", active=null;
 const out=document.getElementById("out"), controls=document.getElementById("controls"), q=document.getElementById("q");
 
-function card(l){
-  const addr=[l.street,[l.city,l.state,l.zip].filter(Boolean).join(" ")].filter(Boolean).join("\n");
+/* ---- map ---- */
+const map=L.map("map",{scrollWheelZoom:false}).setView([41.0,-74.0],8);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(map);
+const icon=a=>L.divIcon({className:"",html:`<div class="pin${a?" active":""}"></div>`,iconSize:[30,30],iconAnchor:[15,30],popupAnchor:[0,-30]});
+const markers=L.layerGroup().addTo(map);
+function addrOf(l){return [l.street,[l.city,l.state,l.zip].filter(Boolean).join(" ")].filter(Boolean).join("\n")}
+
+/* ---- store drawer ---- */
+const drawer=document.getElementById("drawer");
+function openStore(l){
+  active=l;
+  document.getElementById("d-name").textContent=l.name;
+  document.getElementById("d-addr").textContent=addrOf(l);
   const tel=l.phone?`<a href="tel:${esc(l.phone.replace(/[^\d+]/g,""))}">📞 ${esc(l.phone)}</a>`:"";
   const web=l.website?`<a href="${esc(l.website)}" target="_blank" rel="noopener">🌐 Website</a>`:"";
-  return `<div class="card reveal"><h3>${esc(l.name)}</h3><div class="sub addr">${esc(addr)}</div>
-    <div class="links"><a href="${esc(l.maps)}" target="_blank" rel="noopener">📍 Directions</a>${tel}${web}</div></div>`;
+  document.getElementById("d-links").innerHTML=`<a href="${esc(l.maps)}" target="_blank" rel="noopener">📍 Directions</a>${tel}${web}`;
+  const cutoff=Date.now()-1000*60*60*24*120;
+  document.getElementById("d-items").innerHTML=l.carries.length
+    ? l.carries.map(c=>`<div class="flav"><span class="dot${new Date(c.last)<cutoff?" old":""}"></span><span class="n">${esc(c.name.replace(/\s*\(Haitian Soda\)$/,""))}</span><span class="d">${new Date(c.last).toLocaleDateString([], {month:"short",year:"numeric"})}</span></div>`).join("")
+    : '<p class="sub">Ask in store, they carry a rotating mix.</p>';
+  drawer.classList.add("open"); drawer.setAttribute("aria-hidden","false");
+  document.querySelectorAll(".card.active").forEach(c=>c.classList.remove("active"));
+  document.querySelector(`.card[data-id="${CSS.escape(l.id)}"]`)?.classList.add("active");
+  markers.eachLayer(m=>m.setIcon(icon(m._lbs===l)));
+  if(l.lat){map.flyTo([l.lat,l.lng],Math.max(map.getZoom(),13),{duration:.6})}
+}
+function closeStore(){drawer.classList.remove("open");drawer.setAttribute("aria-hidden","true");active=null;
+  document.querySelectorAll(".card.active").forEach(c=>c.classList.remove("active"));markers.eachLayer(m=>m.setIcon(icon(false)))}
+document.getElementById("d-close").onclick=closeStore; document.getElementById("veil").onclick=closeStore;
+addEventListener("keydown",e=>{if(e.key==="Escape")closeStore()});
+
+/* ---- list ---- */
+function card(l){
+  const n=l.carries.length;
+  return `<div class="card reveal" data-id="${esc(l.id)}" tabindex="0" role="button"><h3>${esc(l.name)}</h3><div class="sub addr">${esc(addrOf(l))}</div>
+    <div class="cnt">${n?`🥤 ${n} flavor${n===1?"":"s"} · tap for details`:"tap for details"}</div></div>`;
+}
+function visible(){
+  const t=q.value.trim().toLowerCase();
+  return ALL.filter(l=>(!state||l.state===state)&&(!t||[l.name,l.city,l.zip,l.street,l.state].join(" ").toLowerCase().includes(t)));
 }
 function render(){
-  const t=q.value.trim().toLowerCase();
-  const rows=ALL.filter(l=>(!state||l.state===state)&&(!t||[l.name,l.city,l.zip,l.street,l.state].join(" ").toLowerCase().includes(t)));
+  const rows=visible();
+  markers.clearLayers();
+  const pts=[];
+  rows.filter(l=>l.lat).forEach(l=>{
+    const m=L.marker([l.lat,l.lng],{icon:icon(l===active),title:l.name}); m._lbs=l;
+    m.bindPopup(`<strong>${esc(l.name)}</strong>${esc([l.street,l.city].filter(Boolean).join(", "))}<br><a href="#" data-open="${esc(l.id)}">See what they carry →</a>`);
+    m.on("click",()=>openStore(l)); markers.addLayer(m); pts.push([l.lat,l.lng]);
+  });
+  if(pts.length) map.fitBounds(pts,{padding:[40,40],maxZoom:12});
   if(!rows.length){out.innerHTML=`<p class="empty">No spots match that yet. Want us in your neighborhood? Tell your local store, or <a href="mailto:info@libertybreezesoda.com">email us</a>.</p>`;return}
   const by={}; rows.forEach(l=>(by[l.state||"Other"]??=[]).push(l));
   out.innerHTML=Object.keys(by).sort().map(s=>`<section class="group"><h2>${esc(STATES[s]||s)} <small>${by[s].length} spot${by[s].length===1?"":"s"}</small></h2>
     <div class="grid">${by[s].map(card).join("")}</div></section>`).join("");
+  out.querySelectorAll(".card").forEach(c=>{const l=ALL.find(x=>x.id===c.dataset.id);c.onclick=()=>openStore(l);c.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();openStore(l)}}});
   revealAll();
 }
+map.on("popupopen",e=>{e.popup.getElement().querySelector("[data-open]")?.addEventListener("click",ev=>{ev.preventDefault();openStore(ALL.find(x=>x.id===ev.target.dataset.open))})});
 function chips(){
   const states=[...new Set(ALL.map(l=>l.state).filter(Boolean))].sort();
   const mk=(v,l)=>`<button class="chip${state===v?" on":""}" data-s="${v}">${l}</button>`;
@@ -101,7 +189,7 @@ function chips(){
   controls.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{state=c.dataset.s;chips();render()});
 }
 q.addEventListener("input",render);
-erp("locations").then(d=>{ALL=d.locations;setLive(true,d.updated);chips();render()}).catch(e=>{
+erp("locations").then(d=>{ALL=d.locations.map((l,i)=>({...l,id:String(i),carries:l.carries||[]}));setLive(true,d.updated);chips();render()}).catch(e=>{
   console.error(e);setLive(false);
   out.innerHTML=`<p class="empty">We couldn't load the live list right now.<br><a class="btn" href="tel:1-888-527-7632">📞 Call (888) LBS-SODA</a></p>`;
 });

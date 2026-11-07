@@ -1,4 +1,4 @@
-/* Shared styles for the secondary pages (/locations/, /in-stock/). Mirrors the tokens + header/footer of index.html. */
+/* Shared styles for the secondary pages (/locations/). Mirrors the tokens + header/footer of index.html. */
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
   --sky-hi:#2fb5e8;--sky-lo:#a8ecff;--lagoon:#00c9c8;--sea:#0093a8;--deep:#045d75;--abyss:#083346;
@@ -31,7 +31,7 @@ header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;ba
 .brand img{width:44px;height:44px;border-radius:50%;box-shadow:0 2px 10px rgba(0,0,0,.3)}
 .nav-links{margin-left:auto;display:flex;align-items:center;gap:1.4rem;font-weight:700}
 .nav-links a{text-decoration:none;color:#fff;font-size:.98rem}
-.nav-links a:not(.btn):hover,.nav-links a.here{color:var(--sun)}
+.nav-links a:not(.btn):hover,.nav-links a.here:not(.btn){color:var(--sun)}
 .nav-links .btn{padding:.55em 1.3em;font-size:.95rem}
 @media(max-width:860px){.nav-links a:not(.btn){display:none}}
 .menu-btn{display:none;width:44px;height:44px;border:0;background:none;flex-direction:column;align-items:center;justify-content:center;gap:5px;flex:0 0 auto}
