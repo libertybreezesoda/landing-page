@@ -140,7 +140,7 @@ function openStore(l){
   const web=l.website?`<a href="${esc(l.website)}" target="_blank" rel="noopener">🌐 Website</a>`:"";
   document.getElementById("d-links").innerHTML=`<a href="${esc(l.maps)}" target="_blank" rel="noopener">📍 Directions</a>${tel}${web}`;
   document.getElementById("d-items").innerHTML=l.carries.length
-    ? l.carries.map(c=>`<div class="flav"><span class="dot${c.bottles<12?" old":""}"></span><span class="n">${esc(c.name.replace(/\s*\(Haitian Soda\)$/,""))}</span><span class="d">${c.bottles} bottle${c.bottles===1?"":"s"}</span></div>`).join("")
+    ? l.carries.map(c=>`<div class="flav"><span class="dot"></span><span class="n">${esc(c.name.replace(/\s*\(Haitian Soda\)$/,""))}</span><span class="d">${c.bottles} bottle${c.bottles===1?"":"s"}</span></div>`).join("")
     : '<p class="sub">Sold out right now. Restock is on the way.</p>';
   drawer.classList.add("open"); drawer.setAttribute("aria-hidden","false");
   document.querySelectorAll(".card.active").forEach(c=>c.classList.remove("active"));
