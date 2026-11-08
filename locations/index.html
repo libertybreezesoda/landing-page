@@ -22,6 +22,7 @@
 .pin{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--sun);border:3px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.45);display:grid;place-items:center}
 .pin::after{content:"";width:9px;height:9px;border-radius:50%;background:var(--ink)}
 .pin.active{background:var(--hibiscus)}
+.pin.empty{background:#8e8ea8}
 .card{cursor:pointer}
 .card.active{border-color:var(--sun);background:rgba(255,210,63,.14)}
 .card .cnt{font-size:.82rem;opacity:.75}
@@ -96,9 +97,9 @@
     <h2 id="d-name"></h2>
     <div class="addr" id="d-addr"></div>
     <div class="links" id="d-links"></div>
-    <h3>What they carry</h3>
+    <h3>On the shelf now</h3>
     <div id="d-items"></div>
-    <p class="note">Based on our deliveries to this store. Call ahead if you're after one flavor in particular.</p>
+    <p class="note">Live from our books: what we've delivered that hasn't sold through yet. Call ahead if you're after one flavor in particular.</p>
   </aside>
 </div>
 
@@ -125,7 +126,7 @@ const out=document.getElementById("out"), controls=document.getElementById("cont
 /* ---- map ---- */
 const map=L.map("map",{scrollWheelZoom:false}).setView([41.0,-74.0],8);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(map);
-const icon=a=>L.divIcon({className:"",html:`<div class="pin${a?" active":""}"></div>`,iconSize:[30,30],iconAnchor:[15,30],popupAnchor:[0,-30]});
+const icon=(a,empty)=>L.divIcon({className:"",html:`<div class="pin${a?" active":""}${empty?" empty":""}"></div>`,iconSize:[30,30],iconAnchor:[15,30],popupAnchor:[0,-30]});
 const markers=L.layerGroup().addTo(map);
 function addrOf(l){return [l.street,[l.city,l.state,l.zip].filter(Boolean).join(" ")].filter(Boolean).join("\n")}
 
@@ -138,18 +139,17 @@ function openStore(l){
   const tel=l.phone?`<a href="tel:${esc(l.phone.replace(/[^\d+]/g,""))}">📞 ${esc(l.phone)}</a>`:"";
   const web=l.website?`<a href="${esc(l.website)}" target="_blank" rel="noopener">🌐 Website</a>`:"";
   document.getElementById("d-links").innerHTML=`<a href="${esc(l.maps)}" target="_blank" rel="noopener">📍 Directions</a>${tel}${web}`;
-  const cutoff=Date.now()-1000*60*60*24*120;
   document.getElementById("d-items").innerHTML=l.carries.length
-    ? l.carries.map(c=>`<div class="flav"><span class="dot${new Date(c.last)<cutoff?" old":""}"></span><span class="n">${esc(c.name.replace(/\s*\(Haitian Soda\)$/,""))}</span><span class="d">${new Date(c.last).toLocaleDateString([], {month:"short",year:"numeric"})}</span></div>`).join("")
-    : '<p class="sub">Ask in store, they carry a rotating mix.</p>';
+    ? l.carries.map(c=>`<div class="flav"><span class="dot${c.cases<1?" old":""}"></span><span class="n">${esc(c.name.replace(/\s*\(Haitian Soda\)$/,""))}</span><span class="d">${c.cases>=1?c.cases+" case"+(c.cases===1?"":"s"):c.bottles+" bottles"}</span></div>`).join("")
+    : '<p class="sub">Sold out right now. Restock is on the way.</p>';
   drawer.classList.add("open"); drawer.setAttribute("aria-hidden","false");
   document.querySelectorAll(".card.active").forEach(c=>c.classList.remove("active"));
   document.querySelector(`.card[data-id="${CSS.escape(l.id)}"]`)?.classList.add("active");
-  markers.eachLayer(m=>m.setIcon(icon(m._lbs===l)));
+  markers.eachLayer(m=>m.setIcon(icon(m._lbs===l,!m._lbs.carries.length)));
   if(l.lat){map.flyTo([l.lat,l.lng],Math.max(map.getZoom(),13),{duration:.6})}
 }
 function closeStore(){drawer.classList.remove("open");drawer.setAttribute("aria-hidden","true");active=null;
-  document.querySelectorAll(".card.active").forEach(c=>c.classList.remove("active"));markers.eachLayer(m=>m.setIcon(icon(false)))}
+  document.querySelectorAll(".card.active").forEach(c=>c.classList.remove("active"));markers.eachLayer(m=>m.setIcon(icon(false,!m._lbs.carries.length)))}
 document.getElementById("d-close").onclick=closeStore; document.getElementById("veil").onclick=closeStore;
 addEventListener("keydown",e=>{if(e.key==="Escape")closeStore()});
 
@@ -157,7 +157,7 @@ addEventListener("keydown",e=>{if(e.key==="Escape")closeStore()});
 function card(l){
   const n=l.carries.length;
   return `<div class="card reveal" data-id="${esc(l.id)}" tabindex="0" role="button"><h3>${esc(l.name)}</h3><div class="sub addr">${esc(addrOf(l))}</div>
-    <div class="cnt">${n?`🥤 ${n} flavor${n===1?"":"s"} · tap for details`:"tap for details"}</div></div>`;
+    <div class="cnt">${n?`🥤 ${n} flavor${n===1?"":"s"} on the shelf · tap for details`:"sold out · restocking"}</div></div>`;
 }
 function visible(){
   const t=q.value.trim().toLowerCase();
@@ -168,8 +168,8 @@ function render(){
   markers.clearLayers();
   const pts=[];
   rows.filter(l=>l.lat).forEach(l=>{
-    const m=L.marker([l.lat,l.lng],{icon:icon(l===active),title:l.name}); m._lbs=l;
-    m.bindPopup(`<strong>${esc(l.name)}</strong>${esc([l.street,l.city].filter(Boolean).join(", "))}<br><a href="#" data-open="${esc(l.id)}">See what they carry →</a>`);
+    const m=L.marker([l.lat,l.lng],{icon:icon(l===active,!l.carries.length),title:l.name}); m._lbs=l;
+    m.bindPopup(`<strong>${esc(l.name)}</strong>${esc([l.street,l.city].filter(Boolean).join(", "))}<br><a href="#" data-open="${esc(l.id)}">See what's on the shelf →</a>`);
     m.on("click",()=>openStore(l)); markers.addLayer(m); pts.push([l.lat,l.lng]);
   });
   if(pts.length) map.fitBounds(pts,{padding:[40,40],maxZoom:12});
