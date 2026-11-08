@@ -140,15 +140,15 @@ function openStore(l){
   document.getElementById("d-links").innerHTML=`<a href="${esc(l.maps)}" target="_blank" rel="noopener">📍 Directions</a>${tel}${web}`;
   document.getElementById("d-items").innerHTML=l.carries.length
     ? l.carries.map(c=>`<div class="flav"><span class="dot"></span><span class="n">${esc(c.name.replace(/\s*\(Haitian Soda\)$/,""))}</span><span class="d">${c.bottles} bottle${c.bottles===1?"":"s"}</span></div>`).join("")
-    : '<p class="sub">Sold out right now. Restock is on the way.</p>';
+    : l.in_stock ? '<p class="sub">In stock. Ask in store for flavors.</p>' : '<p class="sub">Sold out right now. Restock is on the way.</p>';
   drawer.classList.add("open"); drawer.setAttribute("aria-hidden","false");
   document.querySelectorAll(".card.active").forEach(c=>c.classList.remove("active"));
   document.querySelector(`.card[data-id="${CSS.escape(l.id)}"]`)?.classList.add("active");
-  markers.eachLayer(m=>m.setIcon(icon(m._lbs===l,!m._lbs.carries.length)));
+  markers.eachLayer(m=>m.setIcon(icon(m._lbs===l,!m._lbs.in_stock)));
   if(l.lat){map.flyTo([l.lat,l.lng],Math.max(map.getZoom(),13),{duration:.6})}
 }
 function closeStore(){drawer.classList.remove("open");drawer.setAttribute("aria-hidden","true");active=null;
-  document.querySelectorAll(".card.active").forEach(c=>c.classList.remove("active"));markers.eachLayer(m=>m.setIcon(icon(false,!m._lbs.carries.length)))}
+  document.querySelectorAll(".card.active").forEach(c=>c.classList.remove("active"));markers.eachLayer(m=>m.setIcon(icon(false,!m._lbs.in_stock)))}
 document.getElementById("d-close").onclick=closeStore; document.getElementById("veil").onclick=closeStore;
 addEventListener("keydown",e=>{if(e.key==="Escape")closeStore()});
 
@@ -156,7 +156,7 @@ addEventListener("keydown",e=>{if(e.key==="Escape")closeStore()});
 function card(l){
   const n=l.carries.length;
   return `<div class="card reveal" data-id="${esc(l.id)}" tabindex="0" role="button"><h3>${esc(l.name)}</h3><div class="sub addr">${esc(addrOf(l))}</div>
-    <div class="cnt">${n?`🥤 ${n} flavor${n===1?"":"s"} on the shelf · tap for details`:"sold out · restocking"}</div></div>`;
+    <div class="cnt">${n?`🥤 ${n} flavor${n===1?"":"s"} on the shelf · tap for details`:l.in_stock?"🥤 in stock · tap for details":"sold out · restocking"}</div></div>`;
 }
 function visible(){
   const t=q.value.trim().toLowerCase();
@@ -167,7 +167,7 @@ function render(){
   markers.clearLayers();
   const pts=[];
   rows.filter(l=>l.lat).forEach(l=>{
-    const m=L.marker([l.lat,l.lng],{icon:icon(l===active,!l.carries.length),title:l.name}); m._lbs=l;
+    const m=L.marker([l.lat,l.lng],{icon:icon(l===active,!l.in_stock),title:l.name}); m._lbs=l;
     m.bindPopup(`<strong>${esc(l.name)}</strong>${esc([l.street,l.city].filter(Boolean).join(", "))}<br><a href="#" data-open="${esc(l.id)}">See what's on the shelf →</a>`);
     m.on("click",()=>openStore(l)); markers.addLayer(m); pts.push([l.lat,l.lng]);
   });
@@ -188,7 +188,7 @@ function chips(){
   controls.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{state=c.dataset.s;chips();render()});
 }
 q.addEventListener("input",render);
-erp("locations").then(d=>{ALL=d.locations.map((l,i)=>({...l,id:String(i),carries:l.carries||[]}));setLive(true,d.updated);chips();render()}).catch(e=>{
+erp("locations").then(d=>{ALL=d.locations.map((l,i)=>({...l,id:String(i),carries:l.carries||[],in_stock:l.in_stock??(l.carries||[]).length>0}));setLive(true,d.updated);chips();render()}).catch(e=>{
   console.error(e);setLive(false);
   out.innerHTML=`<p class="empty">We couldn't load the live list right now.<br><a class="btn" href="tel:1-888-527-7632">📞 Call (888) LBS-SODA</a></p>`;
 });
